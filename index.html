@@ -1,0 +1,179 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <title>META II by benfle</title>
+
+    <link rel="stylesheet" href="stylesheets/styles.css">
+    <link rel="stylesheet" href="stylesheets/pygment_trac.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+  </head>
+  <body>
+    <div class="wrapper">
+      <header>
+        <h1>META II</h1>
+        <p>Experiments with META II</p>
+
+        <p class="view"><a href="https://github.com/benfle/META-II">View the Project on GitHub <small>benfle/META-II</small></a></p>
+
+
+        <ul>
+          <li><a href="https://github.com/benfle/META-II/zipball/master">Download <strong>ZIP File</strong></a></li>
+          <li><a href="https://github.com/benfle/META-II/tarball/master">Download <strong>TAR Ball</strong></a></li>
+          <li><a href="https://github.com/benfle/META-II">View On <strong>GitHub</strong></a></li>
+        </ul>
+      </header>
+      <section>
+        <h1>
+<a name="meta-ii" class="anchor" href="#meta-ii"><span class="octicon octicon-link"></span></a>META II</h1>
+
+<blockquote>
+<p>"Get used to a way of thinking in which the hardware of the realization of an idea is much less important than the idea itself."</p>
+
+<p><strong>Valentino Braitenberg</strong>, <em>Vehicles</em>, p. 2</p>
+</blockquote>
+
+<h2>
+<a name="overview" class="anchor" href="#overview"><span class="octicon octicon-link"></span></a>Overview</h2>
+
+<p>This is a JavaScript implementation of the META II <a href="http://en.wikipedia.org/wiki/Metacompiler">metacompiler</a> as described by Val Shorre in <a href="http://dl.acm.org/citation.cfm?doid=800257.808896">the original paper from 1964</a>.</p>
+
+<p>I used the same byte-code interpreter. So I was able to bootstrap the system using <a href="http://www.bayfronttechnologies.com/mc_tutorial.html">James Neighbors' compiled version of META II</a>.</p>
+
+<p>META II contains three important ideas in computing:</p>
+
+<ol>
+<li>the creation of domain-specific languages,</li>
+<li>the use of a virtual machine,</li>
+<li>and the ability for a system to host its own evolution.</li>
+</ol><h2>
+<a name="metalinguistic-abstraction" class="anchor" href="#metalinguistic-abstraction"><span class="octicon octicon-link"></span></a>Metalinguistic Abstraction</h2>
+
+<p>When developing software systems, <a href="http://en.wikipedia.org/wiki/Metalinguistic_abstraction">creating new languages</a> is sometimes the best approach for dealing with complexity. It allows the programmer to focus on the problem instead of being distracted by implementation details.</p>
+
+<p>META II is itself a language specific to the domain of compiler writing.</p>
+
+<blockquote>
+<p>"META II is a compiler writing language which consists of syntax equations resembling Backus normal form and into which instructions to output assembly language commands are inserted."</p>
+
+<p><strong>D. V. Shorre</strong>, <a href="http://dl.acm.org/citation.cfm?doid=800257.808896"><em>META II A Syntax-Oriented Compiler Writing Language</em></a></p>
+</blockquote>
+
+<p>To create a new domain-specific language with META II, the programmer has to:</p>
+
+<ol>
+<li>implement the basic objects and operations of the domain in a byte-code interpreter,</li>
+<li>and specify the syntax and semantics of the language by writing a grammar in the META II language.</li>
+</ol><p>Please note that the byte-code interpreter is just one implementation of the idea that made sense in 1964. Today, we would probably implement the compiler with <a href="http://en.wikipedia.org/wiki/Threaded_code">threaded code</a> or directly compile the grammar into executable code in a high-level language.</p>
+
+<p>This approach has several advantages:</p>
+
+<ol>
+<li><p>The syntax and semantics of the language can be designed iteratively in a high-level domain-specific language.</p></li>
+<li><p>Porting the language to a new system only requires the implementation of the primitives objects and operations of the domain</p></li>
+<li><p>Other languages can take advantage of the primitives to implement languages with very different syntax and semantics.</p></li>
+</ol><h2>
+<a name="metacompiler" class="anchor" href="#metacompiler"><span class="octicon octicon-link"></span></a>Metacompiler</h2>
+
+<p>The main difference between META II and other <a href="http://en.wikipedia.org/wiki/Compiler-compiler">compiler writing tools</a> is that META II can compile itself. In other words, META II is described using the language it implements. That is why it is called a <a href="http://en.wikipedia.org/wiki/Metacompiler">metacompiler</a>.</p>
+
+<p>Below is the description of META II in META II from the <a href="http://dl.acm.org/citation.cfm?doid=800257.808896">original paper</a>.</p>
+
+<pre><code>.SYNTAX PROGRAM
+
+OUT1 = '*1'     .OUT('GN1')
+     / '*2'     .OUT('GN2')
+     / '*'      .OUT('CI')
+     / .STRING  .OUT('CL ' *).,
+
+OUTPUT = ('.OUT' '(' $ OUT1 ')' / '.LABEL' .OUT('LB') OUT1)
+         .OUT('OUT') .,
+
+EX3 = .ID               .OUT('CLL ' *)
+    / .STRING           .OUT('TST ' *)
+    / '.ID'             .OUT('ID')
+    / '.NUMBER'         .OUT('NUM')
+    / '.STRING'         .OUT('SR')
+    / '(' EX1 ')' 
+    / '.EMPTY'          .OUT('SET')
+    / '$' .LABEL *1 EX3 .OUT('BT ' *1) .OUT('SET').,
+
+EX2 = (EX3 .OUT('BF ' *1) / OUTPUT)
+      $ (EX3 .OUT('BE') / OUTPUT)
+      .LABEL *1 .,
+
+EX1 = EX2
+      $ ('/' .OUT('BT ' *1) EX2)
+      .LABEL *1 .,
+
+ST = .ID .LABEL * '=' EX1 '.,' .OUT('R').,
+
+PROGRAM = '.SYNTAX' .ID .OUT('ADR ' *)
+          $ ST
+          '.END'        .OUT('END').,
+
+.END
+</code></pre>
+
+<p>A detailed explanation of the syntax and semantics of META II is given in <a href="METAII.md">METAII.md</a>.</p>
+
+<p>Because the META II language is described in itself, we can change its syntax by simply modifying the grammar and recompiling it. This operation generally requires two steps:</p>
+
+<ol>
+<li>Modify the grammar to recognize the new language</li>
+<li>Re-write the grammar in the new META language</li>
+</ol><p>Please note that the language we obtained after the first step is not a META language since it cannot compile itself.</p>
+
+<h2>
+<a name="usage" class="anchor" href="#usage"><span class="octicon octicon-link"></span></a>Usage</h2>
+
+<h3>
+<a name="to-create-a-language" class="anchor" href="#to-create-a-language"><span class="octicon octicon-link"></span></a>To Create a Language</h3>
+
+<p>Create the compiler for your new language with:</p>
+
+<pre><code>node compile.js bootstrap/meta2.o &lt;grammar file&gt;
+</code></pre>
+
+<p>This should write the assembly code for the new compiler on stdout.</p>
+
+<p>To use the new compiler on a program:</p>
+
+<pre><code>node compile.js &lt;compiled grammar&gt; &lt;your program&gt;
+</code></pre>
+
+<p>This should write the assembly code for your own byte-code interpreter on stdout.</p>
+
+<h3>
+<a name="to-create-a-meta-language" class="anchor" href="#to-create-a-meta-language"><span class="octicon octicon-link"></span></a>To Create a META language</h3>
+
+<p>First, you can make sure our META II language compile itself with:</p>
+
+<pre><code>node compile.js bootstrap/meta2.o lib/meta2 | diff bootstrap/meta2.o -
+</code></pre>
+
+<p>You can modify the grammar to recognize a new META language and compile it with:</p>
+
+<pre><code>node compile.js bootstrap/meta2.o &lt;new grammar&gt;
+</code></pre>
+
+<p>Then you can use your new META language to describe itself and compile it with:</p>
+
+<pre><code>node compile.js &lt;compiled grammar&gt; &lt;new META grammar&gt;
+</code></pre>
+
+<p>You should get back the compiled version of the new META grammar.</p>
+      </section>
+      <footer>
+        <p>This project is maintained by <a href="https://github.com/benfle">benfle</a></p>
+        <p><small>Hosted on GitHub Pages &mdash; Theme by <a href="https://github.com/orderedlist">orderedlist</a></small></p>
+      </footer>
+    </div>
+    <script src="javascripts/scale.fix.js"></script>
+    
+  </body>
+</html>
