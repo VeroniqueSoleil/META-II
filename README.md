@@ -6,7 +6,7 @@
 
 ## Overview
 
-This is a JavaScript implementation of the META II [metacompiler](http://en.wikipedia.org/wiki/Metacompiler) as described by Val Shorre in [the original paper from 1964](http://dl.acm.org/citation.cfm?doid=800257.808896).
+This is a JavaScript implementation of the META II [metacompiler](http://en.wikipedia.org/wiki/Metacompiler) as described by Val Schorre in [the original paper from 1964](http://dl.acm.org/citation.cfm?doid=800257.808896).
 
 I used the same byte-code interpreter. So I was able to bootstrap the system using [James Neighbors' compiled version of META II](http://www.bayfronttechnologies.com/mc_tutorial.html).
 
